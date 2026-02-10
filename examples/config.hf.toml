@@ -1,0 +1,28 @@
+[llm]
+backend = "huggingface"
+
+# =================================================
+# Prompt registry (shared across ALL backends)
+# =================================================
+
+[prompts.mda_summary]
+prompt_file = "mda_output/1721056_1_0001477932-26-000170_MD-and-A.txt"
+system = """
+You are a senior equity research analyst.
+Summarize the MD&A with emphasis on:
+- Revenue drivers
+- Cost pressures
+- Management outlook
+"""
+
+# =================================================
+# Hugging Face backend (Transformers)
+# =================================================
+
+[[models]]
+name = "meta-llama/Llama-3-8B-Instruct"
+prompts = ["mda_summary"]
+
+[[models]]
+name = "Qwen/Qwen2.5-7B-Instruct"
+prompts = ["mda_summary"]

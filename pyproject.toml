@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "klc-llm-pipeline"
+version = "0.1.0"
+description = "Config-driven LLM pipeline supporting Ollama and Hugging Face backends"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Kellogg Research Support", email = "rs@kellogg.northwestern.edu" }
+]
+
+dependencies = [
+  "ollama",
+  "beautifulsoup4",
+  "transformers>=4.40",
+  "torch",
+  "accelerate",
+]
+
+[project.optional-dependencies]
+
+test = [
+  "pytest",
+  "pytest-mock",
+  "pytest-cov",
+]
+
+dev = [
+  "black",
+  "ruff",
+  "pre-commit",
+]
+
+
+[project.scripts]
+klc-llm-pipeline = "klc_llm_pipeline.cli:main"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+  "integration: tests requiring external services (ollama, HF models, etc.)"
+]
