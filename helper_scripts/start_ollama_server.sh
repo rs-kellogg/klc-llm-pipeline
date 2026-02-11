@@ -106,11 +106,9 @@ echo "Setting the folder for the Ollama Models to ${OLLAMA_MODELS}"
 export OLLAMA_NUM_PARALLEL=4
 export SINGULARITYENV_OLLAMA_NUM_PARALLEL=4
 
-export OLLAMA_NUM_THREAD=16
-export SINGULARITYENV_OLLAMA_NUM_THREAD=16
-
-
-echo "Setting the number of CPU Threads Ollama can use to ${OLLAMA_NUM_THREAD}"
+echo "A reminder that Ollama will launch as many threads as there are cores on the node."
+echo "Please consider passing the option 'num_thread' set to a value such as 12 when using the"
+echo "ollama client."
 
 # start Ollama service
 export SLURM_JOBID=${SLURM_JOBID:="`hostname`"}

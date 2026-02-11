@@ -5,12 +5,33 @@ backend = "huggingface"
 # Prompt registry (shared across ALL backends)
 # =================================================
 
-[prompts.kellogg]
+[prompts.mda]
 prompt = """
-Tell me about the Kellogg School of Management.
-"""
-system = """
-You love Northwestern University
+You are a senior equity research analyst. Analyze the following Management’s Discussion & Analysis (MD&A) section. Identify unique, material risks and classify their exposure to the specified topics.
+
+Topics: Climate Change, Geopolitical Issues
+
+Tasks:
+
+Identify unique, material risks. Merge overlapping risks. Exclude generic boilerplate.
+
+For each risk, classify exposure to the topics above as:
+
+Positive – topic benefits the company regarding this risk
+
+Negative – topic worsens or increases exposure
+
+Neutral – no clear effect or topic not mentioned
+
+Base classification only on the MD&A. Quote or paraphrase supporting text.
+
+If a topic is not addressed for a risk, classify as Neutral and note “No explicit linkage in MD&A.”
+
+Output format: Table only, no extra commentary:
+Risk Name | Description (1–2 sentences) | Exposure to Climate Change | Exposure to Geopolitical Issues | Supporting Evidence
+
+MD&A snippet:
+"The company operates globally and faces potential supply chain disruptions due to political tensions in key markets. Our manufacturing facilities may also be affected by extreme weather events linked to climate change, which could increase operational costs. Regulatory pressure to reduce emissions may require significant capital investments. Additionally, currency fluctuations and trade restrictions may impact our international revenue."
 """
 
 # =================================================
@@ -18,8 +39,16 @@ You love Northwestern University
 # =================================================
 
 [[models]]
-name = "microsoft/phi-4"
-prompts = ["kellogg"]
+name = "meta-llama/Meta-Llama-3-8B"
+prompts = ["mda"]
 
 [models.options]
-temperature = 0.7
+temperature = 0.5
+
+
+[[models]]
+name = "microsoft/phi-4"
+prompts = ["mda"]
+
+[models.options]
+temperature = 0.5
