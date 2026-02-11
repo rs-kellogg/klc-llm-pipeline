@@ -8,7 +8,13 @@ mamba create --prefix=./llm-pipeline-env python=3.13
 python -m pip install .
 ```
 
-## Start the Ollama Server
+## Run an example with Ollama backend.
+### Navigate to the examples folder
 ```
-source ./helper_scripts/start_ollama_server.sh
+cd examples
+```
+
+### Start the Ollama server
+```
+source ../helper_scripts/start_ollama_server.sh
 ```

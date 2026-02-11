@@ -1,11 +1,24 @@
 import argparse
 import sys
 import logging
+import requests
+
 from pathlib import Path
 
 from .config import load_config
 from .runner import run_model_prompts
 from .backends import get_backend
+
+def check_ollama_server(server_url: str, logger: logging.Logger):
+    try:
+        resp = requests.get(f"{server_url}/api/version", timeout=5)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        raise RuntimeError(f"Failed to reach Ollama server at {server_url}: {e}")
+
+    data = resp.json()
+    version = data.get("version", "unknown")
+    logger.info("Connected to Ollama server %s (version %s)", server_url, version)
 
 
 def setup_logger():
@@ -38,7 +51,7 @@ def main():
 
     parser.add_argument(
         "--server-url",
-        default="http://localhost:11434",
+        default=None,
         help="Ollama server URL (ollama backend only)",
     )
 
@@ -78,11 +91,29 @@ def main():
     # -------------------------
     # Backend selection
     # -------------------------
+
     backend_name = (
         args.backend
         or config.get("llm", {}).get("backend")
         or "ollama"
     )
+
+    # -------------------------
+    # Ollama-specific validation
+    # -------------------------
+    if backend_name == "ollama":
+        if args.server_url is None:
+            logger.error(
+                "Backend 'ollama' requires --server-url to be explicitly provided."
+                "Very likely, you can provide '--server-url http://localhost:${OLLAMA_PORT}'"
+            )
+            sys.exit(1)
+
+        try:
+            check_ollama_server(args.server_url, logger)
+        except Exception as e:
+            logger.error(str(e))
+            sys.exit(1)
 
     try:
         backend = get_backend(

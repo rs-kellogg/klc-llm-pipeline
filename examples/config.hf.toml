@@ -5,14 +5,12 @@ backend = "huggingface"
 # Prompt registry (shared across ALL backends)
 # =================================================
 
-[prompts.mda_summary]
-prompt_file = "mda_output/1721056_1_0001477932-26-000170_MD-and-A.txt"
+[prompts.kellogg]
+prompt = """
+Tell me about the Kellogg School of Management.
+"""
 system = """
-You are a senior equity research analyst.
-Summarize the MD&A with emphasis on:
-- Revenue drivers
-- Cost pressures
-- Management outlook
+You love Northwestern University
 """
 
 # =================================================
@@ -20,9 +18,8 @@ Summarize the MD&A with emphasis on:
 # =================================================
 
 [[models]]
-name = "meta-llama/Llama-3-8B-Instruct"
-prompts = ["mda_summary"]
+name = "microsoft/phi-4"
+prompts = ["kellogg"]
 
-[[models]]
-name = "Qwen/Qwen2.5-7B-Instruct"
-prompts = ["mda_summary"]
+[models.options]
+temperature = 0.7
