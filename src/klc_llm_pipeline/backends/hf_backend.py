@@ -1,5 +1,6 @@
 from time import perf_counter
 import logging
+import transformers
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -24,6 +25,7 @@ class HuggingFaceBackend(LLMBackend):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.dtype = dtype
         self._pipelines = {}
+        self.transformers_version = transformers.__version__
 
     def ensure_model(self, model: str) -> None:
         AutoTokenizer.from_pretrained(model)
@@ -37,14 +39,29 @@ class HuggingFaceBackend(LLMBackend):
                 torch_dtype=getattr(torch, self.dtype) if self.dtype else None,
             ).to(self.device)
 
-            self._pipelines[model] = pipeline(
-                "text-generation",
-                model=model_obj,
-                tokenizer=tokenizer,
-                device=0 if self.device == "cuda" else -1,
-            )
+            # Determine quantization if possible
+            quantization = getattr(model_obj, "quantization_config", None)
 
-        return self._pipelines[model]
+            # Determine max context tokens
+            max_context_tokens = getattr(tokenizer, "model_max_length", None)
+
+            # Save model metadata in the pipeline dict
+            self._pipelines[model] = {
+                "pipeline": pipeline(
+                    "text-generation",
+                    model=model_obj,
+                    tokenizer=tokenizer,
+                    device=0 if self.device == "cuda" else -1,
+                ),
+                "model_obj": model_obj,
+                "tokenizer": tokenizer,
+                "max_context_tokens": max_context_tokens,
+                "quantization": quantization,
+                "model_revision": getattr(model_obj.config, "_commit_hash", None) 
+                                 or getattr(model_obj.config, "revision", None)
+            }
+
+        return self._pipelines[model]["pipeline"]
 
     def _make_generation_config(
         self,
@@ -107,7 +124,8 @@ class HuggingFaceBackend(LLMBackend):
         stream: bool = False,
     ):
         pipe = self._get_pipeline(model)
-        model_obj = pipe.model
+        pipeline_info = self._pipelines[model]
+        model_obj = pipeline_info["model_obj"]
 
         full_prompt = f"{system}\n\n{prompt}" if system else prompt
 
@@ -140,6 +158,10 @@ class HuggingFaceBackend(LLMBackend):
                 "generation_options_overrides": overrides,
                 "generation_options_defaults": defaults,
                 "seed": seed,
+                "max_context_tokens": pipeline_info["max_context_tokens"],
+                "transformers_version": self.transformers_version,
+                "model_revision": pipeline_info["model_revision"],
+                "quantization": pipeline_info["quantization"],
             },
             "wall_time_s": perf_counter() - start,
         }

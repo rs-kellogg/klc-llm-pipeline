@@ -34,6 +34,7 @@ def save_result(
     if system:
         content_lines.extend(["", "System:", system])
 
+    # Response section
     content_lines.extend([
         "",
         "Response:",
@@ -48,6 +49,20 @@ def save_result(
         f"- Total Ollama time: {ns_to_ms(stats.get('total_duration'))}",
         f"- Wall time: {result['wall_time_s'] * 1000:.1f} ms",
     ])
+
+    # Hugging Face specific stats
+    if backend.lower() == "huggingface":
+        content_lines.extend([
+            "",
+            "Hugging Face Model Info:",
+            f"- Transformers version: {stats.get('transformers_version', 'n/a')}",
+            f"- Model revision / SHA: {stats.get('model_revision', 'n/a')}",
+            f"- Max context tokens: {stats.get('max_context_tokens', 'n/a')}",
+            f"- Quantization: {stats.get('quantization', 'n/a')}",
+            f"- Generation options overrides: {stats.get('generation_options_overrides', {})}",
+            f"- Generation options defaults: {stats.get('generation_options_defaults', {})}",
+            f"- Seed: {stats.get('seed', 'n/a')}",
+        ])
 
     path.write_text("\n".join(content_lines) + "\n", encoding="utf-8")
 
