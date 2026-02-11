@@ -39,11 +39,19 @@ class HuggingFaceBackend(LLMBackend):
                 torch_dtype=getattr(torch, self.dtype) if self.dtype else None,
             ).to(self.device)
 
-            # Determine quantization if possible
-            quantization = getattr(model_obj, "quantization_config", None)
+            # Determine model quantization
+            if getattr(model_obj, "is_loaded_in_4bit", False):
+                quantization = "4bit"
+            elif getattr(model_obj, "is_loaded_in_8bit", False):
+                quantization = "8bit"
+            else:
+                quantization = str(model_obj.dtype)
 
             # Determine max context tokens
             max_context_tokens = getattr(tokenizer, "model_max_length", None)
+
+            # Determine model revision / SHA
+            model_revision = getattr(model_obj.config, "_commit_hash", None) or getattr(model_obj.config, "revision", None)
 
             # Save model metadata in the pipeline dict
             self._pipelines[model] = {
@@ -57,8 +65,7 @@ class HuggingFaceBackend(LLMBackend):
                 "tokenizer": tokenizer,
                 "max_context_tokens": max_context_tokens,
                 "quantization": quantization,
-                "model_revision": getattr(model_obj.config, "_commit_hash", None) 
-                                 or getattr(model_obj.config, "revision", None)
+                "model_revision": model_revision,
             }
 
         return self._pipelines[model]["pipeline"]
@@ -126,8 +133,12 @@ class HuggingFaceBackend(LLMBackend):
         pipe = self._get_pipeline(model)
         pipeline_info = self._pipelines[model]
         model_obj = pipeline_info["model_obj"]
+        tokenizer = pipeline_info["tokenizer"]
 
         full_prompt = f"{system}\n\n{prompt}" if system else prompt
+
+        # Calculate prompt length in tokens
+        prompt_tokens = len(tokenizer(full_prompt, return_tensors="pt")["input_ids"][0])
 
         gen_config, overrides, defaults, seed = self._make_generation_config(
             model_obj, options, temperature
@@ -162,6 +173,7 @@ class HuggingFaceBackend(LLMBackend):
                 "transformers_version": self.transformers_version,
                 "model_revision": pipeline_info["model_revision"],
                 "quantization": pipeline_info["quantization"],
+                "prompt_tokens": prompt_tokens,
             },
             "wall_time_s": perf_counter() - start,
         }
