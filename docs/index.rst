@@ -10,5 +10,6 @@ CLI utilities for
    usage
    configuration
    cli
+   output
    api
 

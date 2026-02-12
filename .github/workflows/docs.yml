@@ -18,9 +18,62 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_MODELS: ${{ github.workspace }}/.ollama/models
+      MODEL_NAME: llama3:8b
+
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Cache Ollama models
+      - name: Cache Ollama models
+        uses: actions/cache@v4
+        with:
+          path: .ollama/models
+          key: ollama-${{ runner.os }}-llama3-8b-v1
+          restore-keys: |
+            ollama-${{ runner.os }}-
+
+      # Install Ollama
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama --version
+
+      # Start Ollama server
+      - name: Start Ollama server
+        run: |
+          mkdir -p .ollama/models
+          OLLAMA_MODELS=${OLLAMA_MODELS} ollama serve > ollama.log 2>&1 &
+          
+          # Wait until server responds
+          for i in {1..20}; do
+            if curl -s http://localhost:11434/api/tags > /dev/null; then
+              echo "Ollama is ready"
+              break
+            fi
+            echo "Waiting for Ollama..."
+            sleep 2
+          done
+
+      # Pull model only if not cached
+      - name: Ensure model is available
+        run: |
+          if ! ollama list | grep -q "llama3:8b"; then
+            echo "Model not found in cache, pulling..."
+            ollama pull $MODEL_NAME
+          else
+            echo "Model already cached."
+          fi
+
+      # Optional: sanity check
+      - name: Test model
+        run: |
+          curl http://localhost:11434/api/generate \
+            -d '{"model": "llama3:8b", "prompt": "Say hello in one sentence."}'
 
       - name: Set up Python
         uses: actions/setup-python@v5
