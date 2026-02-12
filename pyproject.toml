@@ -36,6 +36,12 @@ dev = [
   "pre-commit",
 ]
 
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme",
+    "sphinx-argparse",
+]
+
 
 [project.scripts]
 klc-llm-pipeline = "klc_llm_pipeline.cli:main"
