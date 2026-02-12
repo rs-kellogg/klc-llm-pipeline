@@ -1,29 +1,60 @@
 Command Line Interface
 ======================
 
-The ``klc-llm-pipeline`` command provides utilities for interacting with
-Redivis datasets.
+The ``klc-llm-pipeline`` command enables helps streamline trying out open-source models on KLC.
 
 Examples
 --------
 
-Upload a new dataset version with two tables:
+Log into a KLC node and run the following
 
-.. code-block:: bash
+.. code-block:: console
 
-     mkdir test_klc_llm_pipeline; cd test_klc_llm_pipeline
-     module load klc-llm-pipeline/1.0
-     start_ollama
-     cp /kellogg/software/envs/klc-llm-pipeline/share/klc_llm_pipeline/examples/config.ollama.toml .
-     cp /kellogg/software/envs/klc-llm-pipeline/share/klc_llm_pipeline/examples/config.hf.toml .
-     # Ollama Backend Example
-     klc-llm-pipeline config.ollama.toml --server-url http://localhost:${OLLAMA_PORT}
-     # HF/Transformers Backend Example
-     klc-llm-pipeline config.hf.toml
+   $ mkdir test_klc_llm_pipeline
+   $ cd test_klc_llm_pipeline
+   $ module load klc-llm-pipeline/1.0
+   $ start_ollama
+
+Ollama server should now be started and a file that contains the server logs called `serve_ollama_*` should now
+appear in this folder.
+
+Now create a file called `config.ollama.toml` and add the following content.
 
 
-Full Argument Reference
------------------------
+.. code-block:: toml
+
+   [llm]
+   backend = "ollama"
+
+   [prompts.kellogg]
+   prompt = "Tell me about the Kellogg School of Management"
+   system = "You love AI."
+
+   [[models]]
+   name = "llama3:8b"
+   prompts = ["kellogg"]
+
+       [models.options]
+       temperature = 0.7
+       seed = 42
+       num_thread = 8
+
+Now run the pipeline.
+
+.. code-block:: console
+
+     $ klc-llm-pipeline config.ollama.toml --server-url http://localhost:${OLLAMA_PORT}
+
+If this was successful, you should see a folder called `results` in your current working directory and be able to run
+
+.. code-block:: console
+
+    $ cat results/ollama/llama3\:8b/kellogg.txt 
+
+in order to see the log.
+
+Full Argument Reference For `klc-llm-pipeline`
+----------------------------------------------
 
 .. argparse::
    :module: klc_llm_pipeline.cli
