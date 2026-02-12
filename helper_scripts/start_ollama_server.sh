@@ -101,23 +101,32 @@ export SINGULARITYENV_OLLAMA_HOST=0.0.0.0:${OLLAMA_PORT}
 export OLLAMA_MODELS=/scratch/$USER/Ollama-Models
 export SINGULARITYENV_OLLAMA_MODELS=/scratch/$USER/Ollama-Models
 
+echo "Ollama server will listen for request on the following port: ${OLLAMA_PORT}"
 echo "Setting the folder for the Ollama Models to ${OLLAMA_MODELS}"
 
-export OLLAMA_NUM_PARALLEL=16
-export SINGULARITYENV_OLLAMA_NUM_PARALLEL=16
+export OLLAMA_NUM_PARALLEL=4
+export SINGULARITYENV_OLLAMA_NUM_PARALLEL=4
 
-echo "Setting the number of CPU Threads Ollama can use to ${OLLAMA_NUM_PARALLEL}"
+echo "A reminder that Ollama will launch as many threads as there are cores on the node."
+echo "Please consider passing the option 'num_thread' set to a value such as 12 when using the"
+echo "ollama client."
 
 # start Ollama service
 export SLURM_JOBID=${SLURM_JOBID:="`hostname`"}
 ollama serve &> serve_ollama_${SLURM_JOBID}.log &
-OLLAMA_PID=$!
 
-echo "Ollama server started on port ${OLLAMA_PORT}"
-echo "  PID: ${OLLAMA_PID}"
-echo "  To stop it manually, run:"
-echo "    kill -9 ${OLLAMA_PID}"
-
-echo "Sleeping for 15 seconds for the Ollama server to fully start"
 # wait until Ollama service has been started
+echo "Sleeping for 15 seconds for the Ollama server to fully start"
 sleep 15
+
+OLLAMA_PIDS=$(pgrep -u "$USER" -f "ollama serve")
+
+if [[ -z "$OLLAMA_PIDS" ]]; then
+  echo "No Ollama server processes found"
+else
+  for pid in $OLLAMA_PIDS; do
+    echo "Found Ollama server PID: $pid"
+    echo "To manually terminate the Ollama Server, run"
+    echo "    kill -9 $pid"
+  done
+fi

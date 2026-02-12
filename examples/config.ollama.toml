@@ -5,66 +5,73 @@ backend = "ollama"
 # Prompt registry (shared across ALL backends)
 # =================================================
 
-[prompts.mda_summary]
-prompt_file = "mda_output/1721056_1_0001477932-26-000170_MD-and-A.txt"
-system = """
-You are a senior equity research analyst.
-Summarize the MD&A with emphasis on:
-- Revenue drivers
-- Cost pressures
-- Management outlook
+[prompts.mda]
+prompt = """
+You are a senior equity research analyst. Analyze the following Management’s Discussion & Analysis (MD&A) section. Identify unique, material risks and classify their exposure to the specified topics.
+
+Topics: Climate Change, Geopolitical Issues
+
+Tasks:
+
+Identify unique, material risks. Merge overlapping risks. Exclude generic boilerplate.
+
+For each risk, classify exposure to the topics above as:
+
+Positive – topic benefits the company regarding this risk
+
+Negative – topic worsens or increases exposure
+
+Neutral – no clear effect or topic not mentioned
+
+Base classification only on the MD&A. Quote or paraphrase supporting text.
+
+If a topic is not addressed for a risk, classify as Neutral and note “No explicit linkage in MD&A.”
+
+Output format: Table only, no extra commentary:
+Risk Name | Description (1–2 sentences) | Exposure to Climate Change | Exposure to Geopolitical Issues | Supporting Evidence
+
+MD&A snippet:
+"The company operates globally and faces potential supply chain disruptions due to political tensions in key markets. Our manufacturing facilities may also be affected by extreme weather events linked to climate change, which could increase operational costs. Regulatory pressure to reduce emissions may require significant capital investments. Additionally, currency fluctuations and trade restrictions may impact our international revenue."
 """
 
-
 # =================================================
-# Ollama backend (local models)
+# Hugging Face backend (Transformers)
 # =================================================
 
 [[models]]
 name = "llama3:8b"
-prompts = ["mda_summary"]
-#[models.options]
-## Context window size (default: 2048)
-## Larger values allow the model to consider more prior tokens
-#num_ctx = 4096
-#
-## How far back to look to prevent repetition
-## 0 = disabled, -1 = use num_ctx (default: 64)
-#repeat_last_n = 64
-#
-## Strength of repetition penalty (default: 1.1)
-## Higher = less repetition, lower = more permissive
-#repeat_penalty = 1.1
-#
-## Sampling temperature (default: 0.8)
-## Lower = more deterministic, higher = more creative
-#temperature = 0.7
-#
-## Random seed for reproducible outputs (default: 0 = random)
-#seed = 42
-#
-## Maximum number of tokens to generate
-## -1 = unlimited generation (default)
-#num_predict = 128
-#
-## Top-K sampling (default: 40)
-## Higher values increase diversity, lower values increase focus
-#top_k = 40
-#
-## Top-P (nucleus) sampling (default: 0.9)
-## Controls probability mass used for token selection
-#top_p = 0.9
-#
-## Minimum probability threshold relative to most likely token
-## Alternative to top_p (default: 0.0)
-#min_p = 0.05
+prompts = ["mda"]
 
+[models.options]
+# Context window size (default: 4096)
+# Larger values allow the model to consider more prior tokens
+num_ctx = 8192
+
+# Sampling temperature (default: 0.8)
+# Lower = more deterministic, higher = more creative
+temperature = 0.7
+
+# Random seed for reproducible outputs (default: 0 = random)
+seed = 42
+
+# Controls the number of threads that Ollama server uses
+num_thread = 8
 
 [[models]]
-name = "mistral:7b"
-prompts = ["mda_summary"]
+name = "phi4:14b"
+prompts = ["mda"]
 
-[[models]]
-name = "qwen3:8b"
-prompts = ["mda_summary"]
+[models.options]
+# Context window size (default: 4096)
+# Larger values allow the model to consider more prior tokens
+num_ctx = 8192
 
+# Sampling temperature (default: 0.8)
+# Lower = more deterministic, higher = more creative
+temperature = 0.5
+
+# Random seed for reproducible outputs (default: 0 = random)
+seed = 42
+
+# Controls the number of threads that Ollama server uses
+num_thread = 8
