@@ -4,9 +4,9 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-project = "krs-redivis-tools"
+project = "klc-llm-pipeline"
 author = "Kellogg RS"
-copyright = "2025"
+copyright = "2026"
 release = "0.1.0"
 
 extensions = [

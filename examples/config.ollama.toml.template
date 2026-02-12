@@ -5,14 +5,22 @@ backend = "ollama"
 # Prompt registry (shared across ALL backends)
 # =================================================
 
-[prompts.mda_summary]
-prompt_file = "mda_output/1721056_1_0001477932-26-000170_MD-and-A.txt"
+[prompts.kellogg]
+prompt = """
+Tell me about the Kellogg School of Management
+"""
+
 system = """
-You are a senior equity research analyst.
-Summarize the MD&A with emphasis on:
-- Revenue drivers
-- Cost pressures
-- Management outlook
+You love AI.
+"""
+
+[prompts.northwestern]
+prompt = """
+Tell me about Northwestern
+"""
+
+system = """
+You love AI.
 """
 
 
@@ -22,49 +30,53 @@ Summarize the MD&A with emphasis on:
 
 [[models]]
 name = "llama3:8b"
-prompts = ["mda_summary"]
-#[models.options]
-## Context window size (default: 2048)
-## Larger values allow the model to consider more prior tokens
-#num_ctx = 4096
-#
-## How far back to look to prevent repetition
-## 0 = disabled, -1 = use num_ctx (default: 64)
-#repeat_last_n = 64
-#
-## Strength of repetition penalty (default: 1.1)
-## Higher = less repetition, lower = more permissive
-#repeat_penalty = 1.1
-#
-## Sampling temperature (default: 0.8)
-## Lower = more deterministic, higher = more creative
-#temperature = 0.7
-#
-## Random seed for reproducible outputs (default: 0 = random)
-#seed = 42
-#
-## Maximum number of tokens to generate
-## -1 = unlimited generation (default)
-#num_predict = 128
-#
-## Top-K sampling (default: 40)
-## Higher values increase diversity, lower values increase focus
-#top_k = 40
-#
-## Top-P (nucleus) sampling (default: 0.9)
-## Controls probability mass used for token selection
-#top_p = 0.9
-#
-## Minimum probability threshold relative to most likely token
-## Alternative to top_p (default: 0.0)
-#min_p = 0.05
+prompts = ["kellogg"]
+
+    [models.options]
+    # Context window size (default: 2048)
+    # Larger values allow the model to consider more prior tokens
+    num_ctx = 4096
+
+    # How far back to look to prevent repetition
+    # 0 = disabled, -1 = use num_ctx (default: 64)
+    repeat_last_n = 64
+
+    # Strength of repetition penalty (default: 1.1)
+    # Higher = less repetition, lower = more permissive
+    repeat_penalty = 1.1
+
+    # Sampling temperature (default: 0.8)
+    # Lower = more deterministic, higher = more creative
+    temperature = 0.7
+
+    # Random seed for reproducible outputs (default: 0 = random)
+    seed = 42
+
+    # Maximum number of tokens to generate
+    # -1 = unlimited generation (default)
+    num_predict = 128
+
+    # Top-K sampling (default: 40)
+    # Higher values increase diversity, lower values increase focus
+    top_k = 40
+
+    # Top-P (nucleus) sampling (default: 0.9)
+    # Controls probability mass used for token selection
+    top_p = 0.9
+
+    # Minimum probability threshold relative to most likely token
+    # Alternative to top_p (default: 0.0)
+    min_p = 0.05
+
+    ## Control the number of parallel threads used for this inference
+    num_thread = 8
 
 
 [[models]]
 name = "mistral:7b"
-prompts = ["mda_summary"]
+prompts = ["northwestern"]
 
 [[models]]
 name = "qwen3:8b"
-prompts = ["mda_summary"]
+prompts = ["northwestern"]
 

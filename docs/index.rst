@@ -8,6 +8,7 @@ CLI utilities for
    :caption: Contents
 
    usage
+   configuration
    cli
    api
 
