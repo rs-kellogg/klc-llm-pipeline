@@ -26,6 +26,8 @@ class OllamaBackend(LLMBackend):
         if temperature is not None:
             opts["temperature"] = temperature
 
+        seed = opts.get("seed")
+
         start = perf_counter()
 
         response = self.client.generate(
@@ -37,17 +39,41 @@ class OllamaBackend(LLMBackend):
         )
 
         if stream:
-            chunks, stats = [], {}
+            chunks, final_chunk = [], {}
             for chunk in response:
                 chunks.append(chunk.get("response", ""))
-                stats = chunk
+                final_chunk = chunk
             text = "".join(chunks)
+            raw_stats = final_chunk
         else:
             text = response.get("response", "")
-            stats = response
+            raw_stats = response
+
+        wall_time = perf_counter() - start
+
+        # Normalize Ollama stats into HF-like structure
+        stats = {
+            "backend": "ollama",
+            "model": model,
+            "prompt_tokens": raw_stats.get("prompt_eval_count"),
+            "eval_count": raw_stats.get("eval_count"),
+            "prompt_eval_duration": raw_stats.get("prompt_eval_duration"),
+            "eval_duration": raw_stats.get("eval_duration"),
+            "total_duration": raw_stats.get("total_duration"),
+            # HF-compatible fields (when possible)
+            "generation_options_overrides": opts,
+            "generation_options_defaults": {},
+            "seed": seed,
+            # Not available in Ollama
+            "transformers_version": None,
+            "model_revision": None,
+            "max_context_tokens": None,
+            "quantization": None,
+        }
 
         return {
-            "text": text,
+            "text": text.strip(),
             "stats": stats,
-            "wall_time_s": perf_counter() - start,
+            "wall_time_s": wall_time,
         }
+

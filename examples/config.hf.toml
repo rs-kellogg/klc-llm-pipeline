@@ -38,12 +38,12 @@ MD&A snippet:
 # Hugging Face backend (Transformers)
 # =================================================
 
-[[models]]
-name = "meta-llama/Meta-Llama-3-8B"
-prompts = ["mda"]
-
-[models.options]
-temperature = 0.5
+#[[models]]
+#name = "meta-llama/Meta-Llama-3-8B"
+#prompts = ["mda"]
+#
+#[models.options]
+#temperature = 0.5
 
 
 [[models]]
@@ -52,3 +52,4 @@ prompts = ["mda"]
 
 [models.options]
 temperature = 0.5
+seed = 42

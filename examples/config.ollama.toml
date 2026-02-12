@@ -56,3 +56,22 @@ seed = 42
 
 # Controls the number of threads that Ollama server uses
 num_thread = 8
+
+[[models]]
+name = "phi4:14b"
+prompts = ["mda"]
+
+[models.options]
+# Context window size (default: 4096)
+# Larger values allow the model to consider more prior tokens
+num_ctx = 8192
+
+# Sampling temperature (default: 0.8)
+# Lower = more deterministic, higher = more creative
+temperature = 0.5
+
+# Random seed for reproducible outputs (default: 0 = random)
+seed = 42
+
+# Controls the number of threads that Ollama server uses
+num_thread = 8
