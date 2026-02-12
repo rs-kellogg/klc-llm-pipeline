@@ -101,6 +101,7 @@ export SINGULARITYENV_OLLAMA_HOST=0.0.0.0:${OLLAMA_PORT}
 export OLLAMA_MODELS=/scratch/$USER/Ollama-Models
 export SINGULARITYENV_OLLAMA_MODELS=/scratch/$USER/Ollama-Models
 
+echo "Ollama server will listen for request on the following port: ${OLLAMA_PORT}"
 echo "Setting the folder for the Ollama Models to ${OLLAMA_MODELS}"
 
 export OLLAMA_NUM_PARALLEL=4
