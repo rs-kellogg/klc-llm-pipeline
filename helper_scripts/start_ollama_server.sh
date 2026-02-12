@@ -95,17 +95,32 @@ export OLLAMA_PORT
 module load ollama/0.12.10
 
 export OLLAMA_HOST=0.0.0.0:${OLLAMA_PORT}
-export SINGULARITYENV_OLLAMA_HOST=0.0.0.0:${OLLAMA_PORT} 
+export SINGULARITYENV_OLLAMA_HOST=${OLLAMA_HOST} 
 
 ## Set your models directory
-export OLLAMA_MODELS=/scratch/$USER/Ollama-Models
-export SINGULARITYENV_OLLAMA_MODELS=/scratch/$USER/Ollama-Models
+
+if [ -n "${OLLAMA_MODELS:-}" ]; then
+    # OLLAMA_MODELS already set — use existing value
+    :
+elif [ -d "/scratch/$USER/" ]; then
+    # /scratch/$USER exists — set custom models directory
+    export OLLAMA_MODELS="/scratch/$USER/Ollama-Models"
+else
+    # /scratch/$USER does not exist — warn and fall back to default
+    echo "Warning: OLLAMA_MODELS is not set and /scratch/$USER does not exist."
+    echo "Models will be downloaded to the default location: ~/.ollama/"
+fi
+
+# Export to Singularity if OLLAMA_MODELS is set
+if [ -n "${OLLAMA_MODELS:-}" ]; then
+    export SINGULARITYENV_OLLAMA_MODELS="$OLLAMA_MODELS"
+fi
 
 echo "Ollama server will listen for request on the following port: ${OLLAMA_PORT}"
 echo "Setting the folder for the Ollama Models to ${OLLAMA_MODELS}"
 
 export OLLAMA_NUM_PARALLEL=4
-export SINGULARITYENV_OLLAMA_NUM_PARALLEL=4
+export SINGULARITYENV_OLLAMA_NUM_PARALLEL=$OLLAMA_NUM_PARALLEL
 
 echo "A reminder that Ollama will launch as many threads as there are cores on the node."
 echo "Please consider passing the option 'num_thread' set to a value such as 12 when using the"
