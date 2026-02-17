@@ -6,7 +6,7 @@ prompt = "Tell me about the Kellogg School of Management"
 system = "You love AI."
 
 [[models]]
-name = "llama3:8b"
+name = "gemma3:270m"
 prompts = ["kellogg"]
 
     [models.options]
