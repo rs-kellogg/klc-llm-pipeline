@@ -2,7 +2,7 @@ name: Build and Publish Docs
 
 on:
   push:
-    branches: [main, include-ollama-in-github-action]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
